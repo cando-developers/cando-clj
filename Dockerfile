@@ -54,22 +54,15 @@ RUN ./waf install_cboehm
 USER ${APP_USER}
 WORKDIR ${HOME}
 
-RUN pip3 install --user nglview==1.2.0 && \
-  jupyter nbextension enable --py widgetsnbextension && \
-  jupyter nbextension enable --py nglview
+RUN pip3 install --user jupyter jupyterlab jupyter_kernel_test && \
+    jupyter serverextension enable --user --py jupyterlab && \
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
+    jupyter nbextension enable --user --py widgetsnbextension
 
 RUN git clone -b clasp-updates https://github.com/yitzchak/common-lisp-jupyter.git ${HOME}/quicklisp/local-projects/common-lisp-jupyter && \
-    git clone https://github.com/clasp-developers/bordeaux-threads.git ${HOME}/quicklisp/local-projects/bordeaux-threads && \
-    mkdir -p ${HOME}/quicklisp/local-projects/cl-nglview && \
-    cd ${HOME}/quicklisp/local-projects/cl-nglview && \
-    git init && \
-    git remote add -f origin https://github.com/yitzchak/cl-nglview.git && \
-    git config core.sparseCheckout true && \
-    echo "cl-nglview/" >> .git/info/sparse-checkout && \
-    git pull origin master && \
-   git checkout clj-migrate
+    git clone https://github.com/clasp-developers/bordeaux-threads.git ${HOME}/quicklisp/local-projects/bordeaux-threads
 
-RUN sbcl --eval "(ql:quickload '(:common-lisp-jupyter :cl-nglview))" --eval "(cl-jupyter:install :use-implementation t)" --quit
-#RUN iclasp-boehm --eval "(ql:quickload '(:common-lisp-jupyter :cl-nglview))" --quit --eval "(cl-jupyter:install :use-implementation t)" --quit
+RUN sbcl --eval "(ql:quickload '(:common-lisp-jupyter))" --eval "(cl-jupyter:install :use-implementation t)" --quit
+#RUN iclasp-boehm --eval "(ql:quickload '(:common-lisp-jupyter))" --quit --eval "(cl-jupyter:install :use-implementation t)" --quit
 
-CMD jupyter-notebook --ip=0.0.0.0
+CMD jupyter-lab --ip=0.0.0.0
