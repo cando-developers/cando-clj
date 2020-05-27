@@ -35,7 +35,7 @@ RUN wget https://beta.quicklisp.org/quicklisp.lisp && \
     sbcl --load quicklisp.lisp --eval "(quicklisp-quickstart:install)" --quit && \
     rm quicklisp.lisp
 
-RUN echo "wibble"
+RUN echo "fu"
 RUN git clone https://github.com/clasp-developers/clasp.git
 
 WORKDIR ${HOME}/clasp
@@ -59,10 +59,11 @@ RUN pip3 install --user jupyter jupyterlab jupyter_kernel_test && \
     jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
     jupyter nbextension enable --user --py widgetsnbextension
 
+RUN echo "bar"
 RUN git clone -b clasp-updates https://github.com/yitzchak/common-lisp-jupyter.git ${HOME}/quicklisp/local-projects/common-lisp-jupyter && \
     git clone https://github.com/clasp-developers/bordeaux-threads.git ${HOME}/quicklisp/local-projects/bordeaux-threads
 
 RUN sbcl --eval "(ql:quickload '(:common-lisp-jupyter))" --eval "(cl-jupyter:install :use-implementation t)" --quit
-#RUN iclasp-boehm --eval "(ql:quickload '(:common-lisp-jupyter))" --quit --eval "(cl-jupyter:install :use-implementation t)" --quit
+RUN iclasp-boehm --eval "(ql:quickload '(:common-lisp-jupyter))" --eval "(cl-jupyter:install :use-implementation t)" --quit
 
 CMD jupyter-lab --ip=0.0.0.0
