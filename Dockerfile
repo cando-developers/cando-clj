@@ -58,7 +58,7 @@ RUN pip3 install --user jupyter jupyter_kernel_test nglview==1.2.0 && \
    jupyter nbextension enable --py widgetsnbextension && \
    jupyter nbextension enable --py nglview
 
-RUN echo "fu"
+RUN echo "bar"
 RUN git clone -b clasp-updates https://github.com/yitzchak/common-lisp-jupyter.git ${HOME}/quicklisp/local-projects/common-lisp-jupyter && \
     git clone https://github.com/clasp-developers/bordeaux-threads.git ${HOME}/quicklisp/local-projects/bordeaux-threads && \
     mkdir -p ${HOME}/quicklisp/local-projects/cl-nglview && \
@@ -70,7 +70,7 @@ RUN git clone -b clasp-updates https://github.com/yitzchak/common-lisp-jupyter.g
     git pull origin master && \
     git checkout clj-migrate
 
-RUN sbcl --eval "(ql:quickload '(:common-lisp-jupyter :nglview))" --eval "(cl-jupyter:install :use-implementation t)" --quit
-RUN iclasp-boehm --eval "(ql:quickload '(:common-lisp-jupyter :nglview))" --quit --eval "(cl-jupyter:install :use-implementation t)" --quit
+RUN sbcl --eval "(ql:quickload '(:common-lisp-jupyter :cl-nglview))" --eval "(cl-jupyter:install :use-implementation t)" --quit
+RUN iclasp-boehm --eval "(ql:quickload '(:common-lisp-jupyter :cl-nglview))" --eval "(cl-jupyter:install :use-implementation t)" --quit
 
 CMD jupyter-notebook --ip=0.0.0.0
