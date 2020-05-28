@@ -37,6 +37,8 @@ RUN wget https://beta.quicklisp.org/quicklisp.lisp && \
 
 RUN echo "fu"
 RUN git clone https://github.com/clasp-developers/clasp.git
+WORKDIR ${HOME}/clasp/extensions
+RUN git clone https://github.com/cando-developers/cando.git
 
 WORKDIR ${HOME}/clasp
 RUN echo "USE_PARALLEL_BUILD = True" > wscript.config && \
@@ -46,9 +48,12 @@ RUN echo "USE_PARALLEL_BUILD = True" > wscript.config && \
     ./waf configure && ./waf build_cboehm
 #RUN git clone https://github.com/cando-developers/cando.git extensions/cando
 
+WORKDIR ${HOME}/quicklisp/local-projects
+RUN git clone https://github.com/sionescu/bordeaux-threads.git
+
 COPY --chown=${APP_UID}:${APP_USER} home ${HOME}
 
-USER root
+USER ${APP_USER}
 RUN ./waf install_cboehm
 
 USER ${APP_USER}
