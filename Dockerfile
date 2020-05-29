@@ -35,26 +35,39 @@ RUN wget https://beta.quicklisp.org/quicklisp.lisp && \
     sbcl --load quicklisp.lisp --eval "(quicklisp-quickstart:install)" --quit && \
     rm quicklisp.lisp
 
+USER root
+RUN mkdir /opt/clasp
+RUN chown -R ${APP_USER} /opt/clasp
+
+USER ${APP_USER}
 RUN echo "fu"
 RUN git clone https://github.com/clasp-developers/clasp.git
 WORKDIR ${HOME}/clasp/extensions
 RUN git clone https://github.com/cando-developers/cando.git
 
 WORKDIR ${HOME}/clasp
-RUN echo "USE_PARALLEL_BUILD = True" > wscript.config && \
+RUN echo "PREFIX = '/opt/clasp'" > wscript.config && \
+    echo "USE_PARALLEL_BUILD = True" >> wscript.config && \
     echo "USE_LLD = True" >> wscript.config && \
     echo "CLASP_BUILD_MODE = \"faso\"" >> wscript.config && \
     sed -i s/"--link-static",//g wscript && \
     ./waf configure && ./waf build_cboehm
 #RUN git clone https://github.com/cando-developers/cando.git extensions/cando
 
+USER root
+RUN apt-get install -y libnetcdf-dev
+
+USER ${APP_USER}
 WORKDIR ${HOME}/quicklisp/local-projects
 RUN git clone https://github.com/sionescu/bordeaux-threads.git
+RUN git clone https://github.com/clasp-developers/uuid.git
+RUN git clone https://github.com/clasp-developers/cl-netcdf.git
 
 COPY --chown=${APP_UID}:${APP_USER} home ${HOME}
 
 USER ${APP_USER}
-RUN ./waf install_cboehm
+WORKDIR ${HOME}/clasp
+RUN ./waf install_cboehm ; exit 0
 
 USER ${APP_USER}
 WORKDIR ${HOME}
@@ -65,10 +78,9 @@ RUN pip3 install --user jupyter jupyterlab jupyter_kernel_test && \
     jupyter nbextension enable --user --py widgetsnbextension
 
 RUN echo "bar"
-RUN git clone -b clasp-updates https://github.com/yitzchak/common-lisp-jupyter.git ${HOME}/quicklisp/local-projects/common-lisp-jupyter && \
-    git clone https://github.com/clasp-developers/bordeaux-threads.git ${HOME}/quicklisp/local-projects/bordeaux-threads
+RUN git clone -b clasp-updates https://github.com/yitzchak/common-lisp-jupyter.git ${HOME}/quicklisp/local-projects/common-lisp-jupyter
 
 RUN sbcl --eval "(ql:quickload '(:common-lisp-jupyter))" --eval "(cl-jupyter:install :use-implementation t)" --quit
-RUN iclasp-boehm --eval "(ql:quickload '(:common-lisp-jupyter))" --eval "(cl-jupyter:install :use-implementation t)" --quit
+RUN /opt/clasp/bin/iclasp-boehm --eval "(ql:quickload '(:common-lisp-jupyter))" --eval "(cl-jupyter:install :use-implementation t)" --quit
 
 CMD jupyter-lab --ip=0.0.0.0
