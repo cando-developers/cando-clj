@@ -83,4 +83,14 @@ RUN git clone -b clasp-updates https://github.com/yitzchak/common-lisp-jupyter.g
 RUN sbcl --eval "(ql:quickload '(:common-lisp-jupyter))" --eval "(cl-jupyter:install :use-implementation t)" --quit
 RUN /opt/clasp/bin/iclasp-boehm --eval "(ql:quickload '(:common-lisp-jupyter))" --eval "(cl-jupyter:install :use-implementation t)" --quit
 
+WORKDIR /opt/clasp
+RUN git clone https://github.com/slime/slime.git
+
+ENV SLIME_HOME "/opt/clasp/slime"
+RUN /opt/clasp/bin/iclasp-boehm -N \
+    -e '(load (format nil "/opt/clasp/slime/swank-loader.lisp"))' \
+    -e '(setq swank-loader::*fasl-directory* "/opt/clasp/slime/fasl/")' \
+    -e "(swank-loader:init :delete nil :reload nil :load-contribs nil)" \
+    -e "(core:quit)" 
+
 CMD jupyter-lab --ip=0.0.0.0
